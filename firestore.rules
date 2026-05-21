@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Validation helper for Name registry
+    function isValidName(data) {
+      return data.keys().hasAll(['id', 'name', 'userId', 'userEmail', 'createdAt']) &&
+             data.keys().size() <= 6 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.userEmail is string && data.userEmail == request.auth.token.email &&
+             (data.get('userPhoto', null) == null || (data.userPhoto is string && data.userPhoto.size() <= 1024)) &&
+             data.createdAt == request.time;
+    }
+
+    match /names/{nameId} {
+      // Allow read (both get and list) for signed-in users so they can see all registered names in real-time
+      allow read: if isSignedIn();
+
+      // Allow creation only if signed in, document ID is secure and matches payload ID, and the shape is valid
+      allow create: if isSignedIn() &&
+                       isValidId(nameId) &&
+                       nameId == incoming().id &&
+                       isValidName(incoming());
+
+      // Block all updates and deletes to keep the logged entries immutable and history secure
+      allow update, delete: if false;
+    }
+  }
+}

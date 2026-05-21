@@ -1,0 +1,6 @@
+{
+  "name": "Name Registry",
+  "description": "A simple and beautiful application to registry names connected to Firebase Firestore and Authentication.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

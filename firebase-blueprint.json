@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "nameLog": {
+      "title": "Name Log",
+      "description": "Information about a name entered by a user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the name registry log"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name text captured from user input"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Firebase Authentication UID of the user who added the entry"
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Email of the user who added the entry"
+        },
+        "userPhoto": {
+          "type": "string",
+          "description": "Photo URL of the user who added the entry"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The server timestamp when the log was created"
+        }
+      },
+      "required": ["id", "name", "userId", "userEmail", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/names/{nameId}": {
+      "schema": "nameLog",
+      "description": "The collection storing all registered names"
+    }
+  }
+}
